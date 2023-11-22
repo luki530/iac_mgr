@@ -1,0 +1,137 @@
+---
+- name: prepare_storage script
+  copy:
+    src: usr_sbin_prepare_storage
+    dest: /usr/sbin/prepare_storage
+    mode: 0755
+    owner: root
+    group: root
+
+- name: deploy enable_and_start_service script
+  copy:
+    src: usr_sbin_enable_and_start_service
+    dest: /usr/sbin/enable_and_start_service
+    mode: 0755
+    owner: root
+    group: root
+
+- name: get_non_rootfs_nvme_block_device script
+  copy:
+    src: usr_sbin_get_non_rootfs_nvme_block_device
+    dest: /usr/sbin/get_non_rootfs_nvme_block_device
+    mode: 0755
+    owner: root
+    group: root
+
+- name: put short hostname in /etc/hosts
+  lineinfile:
+    dest: /etc/cloud/templates/hosts.debian.tmpl
+    line: "127.0.1.1 {{ '{{hostname}}' }}"
+    regexp: '^127\.0\.1\.1'
+    insertafter: '^127\.0\.0\.1'
+    state: present
+
+- name: Add group "kafka"
+  group:
+    name: kafka
+    system: yes
+
+- name: Add user "kafka"
+  user:
+    name: kafka
+    group: kafka
+    shell: /sbin/nologin
+    system: yes
+
+- name: fetch kafka package from apache archive (outside China)
+  get_url:
+    url: "https://archive.apache.org/dist/kafka/{{ kafka_package.version }}/kafka_{{ kafka_scala_version }}-{{ kafka_package.version }}.tgz"
+    checksum: "{{ kafka_package.checksum }}"
+    dest: /root/kafka.tgz
+
+- name: Deploy kafka package
+  unarchive:
+    src: /root/kafka.tgz
+    dest: /opt/
+    remote_src: true
+    owner: kafka
+    group: kafka
+
+- name: Symlink kafka directory
+  file:
+    src: "/opt/kafka_{{ kafka_scala_version }}-{{ kafka_package.version }}"
+    dest: /opt/kafka
+    state: link
+
+- name: Create kafka directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: 0775
+  loop:
+    - /opt/kafka
+    - /opt/kafka/data
+    - /var/log/kafka
+
+- name: Deploy kafka config (temporary for kafka log)
+  copy:
+    src: opt_kafka_config_server.properties.temp.env
+    dest: /opt/kafka/config/server.properties.temp.env
+    owner: kafka
+    group: kafka
+    mode: 0644
+
+- name: Deploy log4j config (temporary for kafka log)
+  copy:
+    src: opt_kafka_config_log4j.properties.temp.env
+    dest: /opt/kafka/config/log4j.properties.temp.env
+    owner: kafka
+    group: kafka
+    mode: 0644
+
+- name: Deploy health check script
+  copy:
+    src: usr_sbin_kafka_healthcheck.sh
+    dest: /usr/sbin/kafka_healthcheck.sh
+    owner: kafka
+    group: kafka
+    mode: 0755
+
+- name: Deploy kafka service for systemd
+  copy:
+    src: etc_systemd_system_kafka.service
+    dest: /etc/systemd/system/kafka.service
+
+- name: Deploy /etc/default/kafka.temp
+  copy:
+    src: etc_default_kafka.temp
+    dest: /etc/default/kafka.temp
+
+- name: Create folder for jolokia
+  file:
+    path: /opt/jolokia
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: 0775
+
+- name: Download jolokia jar agent (outside China)
+  get_url:
+    url: "http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/{{ kafka_jolokia_version }}/jolokia-jvm-{{ kafka_jolokia_version }}-agent.jar"
+    dest: "/opt/jolokia/jolokia-jvm-{{ kafka_jolokia_version }}-agent.jar"
+    owner: kafka
+    group: kafka
+    mode: 0755
+
+- name: Symlink jolokia agnet
+  file:
+    src: "/opt/jolokia/jolokia-jvm-{{ kafka_jolokia_version }}-agent.jar"
+    dest: /opt/jolokia/jolokia-agent.jar
+    state: link
+
+- name: Clean up
+  file:
+    path: /root/kafka.tgz
+    state: absent

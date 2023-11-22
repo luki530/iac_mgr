@@ -1,0 +1,165 @@
+---
+- name: prepare_storage script
+  copy:
+    src: usr_sbin_prepare_storage
+    dest: /usr/sbin/prepare_storage
+    mode: 0755
+    owner: root
+    group: root
+
+- name: deploy enable_and_start_service script
+  copy:
+    src: usr_sbin_enable_and_start_service
+    dest: /usr/sbin/enable_and_start_service
+    mode: 0755
+    owner: root
+    group: root
+
+- name: get_non_rootfs_nvme_block_device script
+  copy:
+    src: usr_sbin_get_non_rootfs_nvme_block_device
+    dest: /usr/sbin/get_non_rootfs_nvme_block_device
+    mode: 0755
+    owner: root
+    group: root
+
+- name: put short hostname in /etc/hosts
+  lineinfile:
+    dest: /etc/cloud/templates/hosts.debian.tmpl
+    line: "127.0.1.1 {{ '{{hostname}}' }}"
+    regexp: '^127\.0\.1\.1'
+    insertafter: '^127\.0\.0\.1'
+    state: present
+
+- name: add zookeeper group
+  group:
+    name: zookeeper
+
+- name: add zookeeper user
+  user:
+    name: zookeeper
+    group: zookeeper
+    shell: /bin/nologin
+    home: /opt/zookeeper
+    create_home: false
+
+- name: deploy kernel tunnables
+  copy:
+    src: etc_sysctl.d_50-zookeeper.conf
+    dest: /etc/sysctl.d/50-zookeeper.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: fetch zookeeper package
+  get_url:
+    url: https://dlcdn.apache.org/zookeeper/zookeeper-{{ zookeeper_package.version }}/apache-zookeeper-{{ zookeeper_package.version }}-bin.tar.gz
+    checksum: "{{ zookeeper_package.checksum }}"
+    dest: /root/zookeeper.tar.gz
+
+- name: deploy zookeeper
+  unarchive:
+    src: /root/zookeeper.tar.gz
+    dest: /opt/
+    owner: zookeeper
+    group: zookeeper
+    remote_src: true
+
+- name: symlink /opt/zookeeper
+  file:
+    src: "/opt/apache-zookeeper-{{ zookeeper_package.version }}-bin"
+    dest: /opt/zookeeper
+    state: link
+    force: true
+
+- name: zookeeper directories
+  file:
+    path: "{{ item }}"
+    owner: zookeeper
+    group: zookeeper
+    recurse: yes
+    state: directory
+    mode: 0755
+  loop: "{{ zookeeper_dirs }}"
+
+- name: configuration files
+  template:
+    src: "{{ item }}"
+    dest: "{{zookeeper_conf_dir}}/{{ item | replace('.j2', '') }}"
+    owner: zookeeper
+    group: zookeeper
+    mode: 0644
+  loop:
+    - log4j.properties.j2
+    - zoo.cfg.j2
+    - java.env.j2
+    - zookeeper_env.sh.j2
+
+- name: initial zookeeper id
+  copy:
+    src: opt_zookeeper_data_myid
+    dest: "{{ zookeeper_data_dir }}/myid"
+    owner: zookeeper
+    group: zookeeper
+    mode: 0644
+
+- name: Deploy zookeeper service for systemd
+  template:
+    src: etc_systemd_system_zookeeper.service.j2
+    dest: /etc/systemd/system/zookeeper.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: disable zookeeper service
+  systemd:
+    name: zookeeper
+    state: stopped
+    enabled: no
+    daemon_reload: yes
+
+- name: zookeeper logrotator
+  template:
+    src: etc_logrotate.d_zookeeper.j2
+    dest: /etc/logrotate.d/zookeeper
+    owner: root
+    group: root
+    mode: 0644
+
+- name: zookeeper data logrotator
+  template:
+    src: etc_logrotate.d_zookeeper_data.j2
+    dest: /etc/logrotate.d/zookeeper_data
+    owner: root
+    group: root
+    mode: 0644
+
+- name: copy zookeeper health check script
+  copy:
+    src: usr_sbin_zookeeper_healthcheck.sh
+    dest: /usr/sbin/zookeeper_healthcheck.sh
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create folder for jolokia
+  file:
+    path: /opt/jolokia
+    state: directory
+    owner: zookeeper
+    group: zookeeper
+    mode: 0775
+
+- name: Download jolokia jar agent (outside China)
+  get_url:
+    url: "http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/{{ zookeeper_jolokia_version }}/jolokia-jvm-{{ zookeeper_jolokia_version }}-agent.jar"
+    dest: "/opt/jolokia/jolokia-jvm-{{ zookeeper_jolokia_version }}-agent.jar"
+    owner: zookeeper
+    group: zookeeper
+    mode: 0755
+
+- name: Symlink jolokia agnet
+  file:
+    src: "/opt/jolokia/jolokia-jvm-{{ zookeeper_jolokia_version }}-agent.jar"
+    dest: /opt/jolokia/jolokia-agent.jar
+    state: link

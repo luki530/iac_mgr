@@ -1,0 +1,41 @@
+├── terraform
+│   ├── kafka
+│   │   ├── templates
+│   │   │   └── kafka_userdata.tpl
+│   │   ├── aws.tf
+│   │   ├── data.tf
+│   │   ├── .gitlab-ci.yml
+│   │   ├── iam.tf
+│   │   ├── kafka.tf
+│   │   ├── locals.tf
+│   │   ├── README.md
+│   │   ├── route53.tf
+│   │   ├── sg.tf
+│   │   ├── template.tf
+│   │   └── variables.tf
+│   ├── vpc
+│   │   ├── aws.tf
+│   │   ├── data.tf
+│   │   ├── .gitlab-ci.yml
+│   │   ├── locals.tf
+│   │   ├── outputs.tf
+│   │   ├── README.md
+│   │   ├── variables.tf
+│   │   ├── versions.tf
+│   │   └── vpc.tf
+│   └── zookeeper
+│       ├── templates
+│       │   └── zookeeper_userdata.tpl
+│       ├── aws.tf
+│       ├── data.tf
+│       ├── .gitlab-ci.yml
+│       ├── iam.tf
+│       ├── locals.tf
+│       ├── outputs.tf
+│       ├── README.md
+│       ├── route53.tf
+│       ├── sg.tf
+│       ├── variables.tf
+│       ├── versions.tf
+│       └── zookeeper.tf
+

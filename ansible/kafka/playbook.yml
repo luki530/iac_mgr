@@ -1,0 +1,15 @@
+#!/usr/bin/env ansible-playbook
+
+- name: kafka
+  hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/env python3
+    service_name: kafka
+    kafka_package:
+      version: 3.5.1
+      checksum: sha512:a2b5794fe1921aef4c1de7c72d2c2bf0b343b02b6782a6e35d0e14eba98c90b2ad8828d5fd39f185d87cd3241561a0f12d8283366406f9c69f8088ef89796f15
+    kafka_scala_version: 2.12
+    kafka_jolokia_version: 1.6.0
+  roles:
+    - kafka

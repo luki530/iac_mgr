@@ -1,0 +1,15 @@
+zookeeper_jmx_port: 9999
+zookeeper_dir: /opt/zookeeper
+zookeeper_conf_dir: "{{ zookeeper_dir }}/conf"
+zookeeper_log_dir: /var/log/zookeeper
+zookeeper_log_file: zookeeper.log
+zookeeper_data_dir: /opt/zookeeper/data
+zookeeper_run_dir: /var/run/zookeeper
+zookeeper_transactions_dir: "{{ zookeeper_dir }}/transactions"
+
+zookeeper_dirs:
+  - "{{ zookeeper_conf_dir }}"
+  - "{{ zookeeper_log_dir }}"
+  - "{{ zookeeper_run_dir }}"
+  - "{{ zookeeper_data_dir }}"
+  - "{{ zookeeper_transactions_dir }}"

@@ -1,0 +1,33 @@
+plan-kafka:
+  image: proxy-docker.ac-project.net/alpine
+  stage: plan
+  before_script:
+    - wget -q https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip
+    - unzip -qq terraform_0.15.5_linux_amd64.zip -d /usr/local/bin
+    - chmod +x /usr/local/bin/terraform
+    - terraform --version
+  script:
+    - cd terraform/kafka
+    - terraform init
+    - terraform plan
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+  needs: []
+
+apply-kafka:
+  image: proxy-docker.ac-project.net/alpine
+  stage: apply
+  before_script:
+    - wget -q https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip
+    - unzip -qq terraform_0.15.5_linux_amd64.zip -d /usr/local/bin
+    - chmod +x /usr/local/bin/terraform
+    - terraform --version
+  script:
+    - cd terraform/kafka
+    - terraform init
+    - terraform apply -auto-approve
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+  needs: [plan-kafka]

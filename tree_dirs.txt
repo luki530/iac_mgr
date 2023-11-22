@@ -1,0 +1,25 @@
+.
+├── ansible
+│   ├── kafka
+│   │   └── roles
+│   │       └── kafka
+│   │           ├── files
+│   │           ├── meta
+│   │           ├── tasks
+│   │           └── templates
+│   └── zookeeper
+│       └── roles
+│           └── zookeeper
+│               ├── defaults
+│               ├── files
+│               ├── meta
+│               ├── tasks
+│               └── templates
+└── terraform
+    ├── kafka
+    │   └── templates
+    ├── vpc
+    └── zookeeper
+        └── templates
+
+22 directories

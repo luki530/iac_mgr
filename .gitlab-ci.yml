@@ -1,0 +1,11 @@
+include:
+  - ansible/zookeeper/.gitlab-ci.yml
+  - ansible/kafka/.gitlab-ci.yml
+  - terraform/kafka/.gitlab-ci.yml
+  - terraform/vpc/.gitlab-ci.yml
+  - terraform/zookeeper/.gitlab-ci.yml
+
+stages:
+  - create-ami
+  - plan
+  - apply

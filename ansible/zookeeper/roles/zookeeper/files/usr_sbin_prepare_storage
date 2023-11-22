@@ -1,0 +1,87 @@
+#!/bin/bash
+
+set -e
+
+mount_dir="$1"
+app_user="$2"
+app_group="$3"
+
+
+
+if [[ -z "${mount_dir}" && -z "${app_user}" && -z "${app_group}" ]] ; then
+	echo 'Missing arguments'
+	echo 'usage:	prepare_storage app_path mount_directory [app_user] [app_group]'
+	echo 'ex.:		prepare_storage "/opt/kafka/data" "kafka" "kafka"'
+	exit 22
+fi
+
+if [ "${mount_dir}" = "/" ] ; then
+	echo 'mount_dir argument "/" nothing is going to be mounted.'
+	exit 0
+fi
+
+check_if_storage_device_exists () {
+	until extra_storage="$(get_non_rootfs_nvme_block_device)"; do
+		echo 'Waiting for additional block device ...'
+		sleep 5
+	done
+}
+
+
+
+check_if_storage_is_new () {
+	echo "Checking storage type"
+	if ! grep -q 'LABEL="data"' < <(blkid "$1"); then
+		exitCode="1"
+		echo "New storage"
+	else
+		echo "Existing storage"
+		exitCode="0"
+	fi
+
+	return $exitCode
+}
+
+
+
+prepare_data_storage () {
+	echo "Storage format"
+	mkfs.ext4 -L "data" "$1"
+	tune2fs -r 0 "$1"
+}
+
+
+
+mount_storage () {
+	if grep -Eq '^LABEL=data'  /etc/fstab; then
+		return 0
+	fi
+
+		echo "Mounting storage..."
+	echo "LABEL=data ${mount_dir} ext4 defaults,nofail 0 2" >> /etc/fstab
+	mount LABEL="data"
+
+	# change user:group of mount dir if user and group where provided
+	if [ "${app_user}" ] && [ "${app_group}" ] ; then
+		chown -R "${app_user}":"${app_group}" "${mount_dir}"
+	fi
+
+	echo "Great success"
+}
+
+
+
+
+
+
+
+######################################### ACTIONS
+
+
+check_if_storage_device_exists
+
+if ! check_if_storage_is_new "${extra_storage}" ; then
+	prepare_data_storage "${extra_storage}"
+fi
+
+mount_storage

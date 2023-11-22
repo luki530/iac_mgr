@@ -1,0 +1,100 @@
+.
+├── ansible
+│   ├── kafka
+│   │   ├── roles
+│   │   │   └── kafka
+│   │   │       ├── files
+│   │   │       │   ├── etc_default_kafka.temp
+│   │   │       │   ├── etc_systemd_system_kafka.service
+│   │   │       │   ├── opt_kafka_config_log4j.properties.temp.env
+│   │   │       │   ├── opt_kafka_config_server.properties.temp.env
+│   │   │       │   ├── usr_sbin_enable_and_start_service
+│   │   │       │   ├── usr_sbin_get_non_rootfs_nvme_block_device
+│   │   │       │   ├── usr_sbin_kafka_healthcheck.sh
+│   │   │       │   └── usr_sbin_prepare_storage
+│   │   │       ├── meta
+│   │   │       │   └── main.yml
+│   │   │       ├── tasks
+│   │   │       │   └── main.yml
+│   │   │       └── templates
+│   │   │           └── etc_logrotate.d_syslog.j2
+│   │   ├── .gitlab-ci.yml
+│   │   ├── packer.pkr.hcl
+│   │   ├── playbook.yml
+│   │   └── requirements.yml
+│   └── zookeeper
+│       ├── roles
+│       │   └── zookeeper
+│       │       ├── defaults
+│       │       │   └── main.yml
+│       │       ├── files
+│       │       │   ├── etc_apt_apt_conf_d_proxy
+│       │       │   ├── etc_sysctl.d_50-zookeeper.conf
+│       │       │   ├── opt_zookeeper_data_myid
+│       │       │   ├── usr_sbin_enable_and_start_service
+│       │       │   ├── usr_sbin_get_non_rootfs_nvme_block_device
+│       │       │   ├── usr_sbin_prepare_storage
+│       │       │   └── usr_sbin_zookeeper_healthcheck.sh
+│       │       ├── meta
+│       │       │   └── main.yml
+│       │       ├── tasks
+│       │       │   └── main.yml
+│       │       └── templates
+│       │           ├── etc_logrotate.d_zookeeper_data.j2
+│       │           ├── etc_logrotate.d_zookeeper.j2
+│       │           ├── etc_systemd_system_zookeeper.service.j2
+│       │           ├── java.env.j2
+│       │           ├── log4j.properties.j2
+│       │           ├── usr_local_bin_zookeeper_config.j2
+│       │           ├── zoo.cfg.j2
+│       │           └── zookeeper_env.sh.j2
+│       ├── .gitlab-ci.yml
+│       ├── packer.pkr.hcl
+│       ├── playbook.yml
+│       └── requirements.yml
+├── terraform
+│   ├── kafka
+│   │   ├── templates
+│   │   │   └── kafka_userdata.tpl
+│   │   ├── aws.tf
+│   │   ├── data.tf
+│   │   ├── .gitlab-ci.yml
+│   │   ├── iam.tf
+│   │   ├── kafka.tf
+│   │   ├── locals.tf
+│   │   ├── README.md
+│   │   ├── route53.tf
+│   │   ├── sg.tf
+│   │   ├── template.tf
+│   │   └── variables.tf
+│   ├── vpc
+│   │   ├── aws.tf
+│   │   ├── data.tf
+│   │   ├── .gitlab-ci.yml
+│   │   ├── locals.tf
+│   │   ├── outputs.tf
+│   │   ├── README.md
+│   │   ├── variables.tf
+│   │   ├── versions.tf
+│   │   └── vpc.tf
+│   └── zookeeper
+│       ├── templates
+│       │   └── zookeeper_userdata.tpl
+│       ├── aws.tf
+│       ├── data.tf
+│       ├── .gitlab-ci.yml
+│       ├── iam.tf
+│       ├── locals.tf
+│       ├── outputs.tf
+│       ├── README.md
+│       ├── route53.tf
+│       ├── sg.tf
+│       ├── variables.tf
+│       ├── versions.tf
+│       └── zookeeper.tf
+├── .gitlab-ci.yml
+├── README.md
+├── tree_dirs.txt
+└── tree.txt
+
+22 directories, 75 files

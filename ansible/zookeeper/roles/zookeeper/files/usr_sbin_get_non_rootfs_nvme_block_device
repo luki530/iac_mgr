@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+unset rootfs_device non_rootfs_device
+
+get_rootfs_device() {
+    mount | awk '$3 == "/" && $1 ~ /^\/dev\/nvme/ { print $1 }'
+}
+
+if [[ "$(get_rootfs_device)" =~ ^/dev/(nvme[0-9]+n[0-9]+)(p[0-9]+|)$ ]]; then
+    # Set it to underlying device, ignoring parition table.
+    rootfs_device="${BASH_REMATCH[1]}"
+
+else
+    exit 1
+fi
+
+for device in /sys/class/block/nvme*; do
+    if [[ "${device}" =~ ^/sys/class/block/(nvme[0-9]+n[0-9]+)(p[0-9]+|)$ ]]; then
+        if [ "${BASH_REMATCH[1]}" != "${rootfs_device}" ]; then
+            if [ -e /dev/"${BASH_REMATCH[1]}"p1 ]; then
+                echo /dev/"${BASH_REMATCH[1]}"p1
+            else
+                echo /dev/"${BASH_REMATCH[1]}"
+            fi
+            exit 0
+        fi
+    fi
+done
+
+exit 1

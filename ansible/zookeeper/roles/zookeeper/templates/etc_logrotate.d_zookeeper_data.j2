@@ -1,0 +1,11 @@
+
+{{ zookeeper_log_dir }}/version-2/* {
+    daily 
+    rotate 4
+    size 100M
+    copytruncate
+    compress
+    delaycompress
+    missingok
+    notifempty
+}

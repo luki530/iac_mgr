@@ -1,0 +1,27 @@
+[Unit]
+Description=Zookeeper
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User=zookeeper
+Group=zookeeper
+EnvironmentFile=-{{zookeeper_conf_dir}}/zookeeper_env.sh
+WorkingDirectory={{ zookeeper_data_dir }}
+PermissionsStartOnly=true
+ExecStart={{ zookeeper_dir }}/bin/zkServer.sh start
+ExecStop={{ zookeeper_dir }}/bin/zkServer.sh stop
+SyslogIdentifier=zookeeper
+StandardOutput=journal
+StandardError=journal
+LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+LimitNPROC=infinity
+LimitAS=infinity
+SuccessExitStatus=143
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target

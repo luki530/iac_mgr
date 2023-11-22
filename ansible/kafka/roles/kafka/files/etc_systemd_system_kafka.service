@@ -1,0 +1,27 @@
+[Unit]
+Description=Kafka
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kafka
+Group=kafka
+PIDFile=/var/run/kafka/kafka.pid
+WorkingDirectory=/opt/kafka
+PermissionsStartOnly=true
+EnvironmentFile=-/etc/default/kafka
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+SyslogIdentifier=kafka
+StandardOutput=journal
+StandardError=journal
+LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+LimitNPROC=infinity
+LimitAS=infinity
+Restart=always
+RestartSec=20
+TimeoutStartSec=infinity
+
+[Install]
+WantedBy=multi-user.target

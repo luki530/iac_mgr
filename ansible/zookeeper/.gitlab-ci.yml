@@ -1,0 +1,23 @@
+create-ami-zookeeper:
+  image: proxy-docker.ac-project.net/python:3.8
+  stage: create-ami
+  before_script:
+    - wget -q https://releases.hashicorp.com/packer/1.9.4/packer_1.9.4_linux_amd64.zip
+    - unzip -qq packer_1.9.4_linux_amd64.zip
+    - chmod +x packer
+    - mv packer /usr/local/bin/
+    - packer --version
+    - pip install ansible
+    - ansible --version
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    - unzip -qq awscliv2.zip
+    - ./aws/install
+    - aws --version
+  script:
+    - cd ansible/zookeeper
+    - packer init -var "tag=$CI_COMMIT_TAG" .
+    - packer validate -var "tag=$CI_COMMIT_TAG" .
+    - packer build -var "tag=$CI_COMMIT_TAG" .
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
